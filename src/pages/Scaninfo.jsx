@@ -17,7 +17,7 @@ function ScanInfo() {
   const [message, setMessage] = useState("");
 
   // Ticket Lookup API
-  const lookupTicket = async (decodedText) => {
+  const lookupTicket = async (decodedText, alreadyLocked = false) => {
     if (!decodedText?.trim()) {
       setError("QR code could not be read.");
       return;
@@ -28,7 +28,10 @@ function ScanInfo() {
       return;
     }
 
-    if (processingRef.current) return;
+    if (processingRef.current && !alreadyLocked) return;
+
+
+    
 
     processingRef.current = true;
     setLoading(true);
@@ -50,10 +53,20 @@ function ScanInfo() {
         }
       );
 
-      const result = await response.json();
+      let result;
+      try {
+        result = await response.json();
+      } catch {
+        throw new Error("Ticket lookup returned an invalid response.");
+      }
 
-      if (!response.ok || !result.success) {
-        throw new Error(result.message || "Ticket lookup failed.");
+      if (
+        !response.ok ||
+        !result?.success ||
+        !result.data ||
+        typeof result.data !== "object"
+      ) {
+        throw new Error(result?.message || "Ticket lookup failed.");
       }
 
       setTicketData(result.data);
@@ -112,8 +125,9 @@ function ScanInfo() {
         async (decodedText) => {
           if (processingRef.current) return;
 
+          processingRef.current = true;
           await stopScanner();
-          await lookupTicket(decodedText);
+          await lookupTicket(decodedText, true);
         },
         () => {}
       );
