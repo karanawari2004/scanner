@@ -1,28 +1,46 @@
+
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import "./Login.css";
 
-function Login() {
-  const navigate = useNavigate();
+const AUTH_KEY = "rizzscan_authenticated";
+const LOGIN_USERNAME = import.meta.env.VITE_LOGIN_USERNAME;
+const LOGIN_PASSWORD = import.meta.env.VITE_LOGIN_PASSWORD;
 
+const setAuthenticated = (value) => {
+  const authValue = value ? "true" : "false";
+  sessionStorage.setItem(AUTH_KEY, authValue);
+  localStorage.setItem(AUTH_KEY, authValue);
+};
+
+function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = (e) => {
     e.preventDefault();
+    setError("");
+
+    if (!LOGIN_USERNAME || !LOGIN_PASSWORD) {
+      setError("Login configuration is missing.");
+      return;
+    }
+
+    setLoading(true);
 
     if (
-      username.trim() === import.meta.env.VITE_LOGIN_USERNAME &&
-      password === import.meta.env.VITE_LOGIN_PASSWORD
+      username.trim() === LOGIN_USERNAME.trim() &&
+      password === LOGIN_PASSWORD
     ) {
-      sessionStorage.setItem("rizzscan_authenticated", "true");
-      navigate("/scanInfo");
+      setAuthenticated(true);
+      window.location.replace("/scanInfo");
     } else {
+      setAuthenticated(false);
       setError("Invalid username or password");
+      setLoading(false);
     }
   };
-
-  const [error, setError] = useState("");
 
   return (
     <div className="login-page">
@@ -55,10 +73,14 @@ function Login() {
           }}
         />
 
-        {error && <p className="login-error" role="alert">{error}</p>}
+        {error && (
+          <p className="login-error" role="alert">
+            {error}
+          </p>
+        )}
 
-        <button type="submit">
-          Login
+        <button type="submit" disabled={loading}>
+          {loading ? "Logging in..." : "Login"}
         </button>
       </form>
     </div>

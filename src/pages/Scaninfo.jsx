@@ -1,11 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Html5Qrcode } from "html5-qrcode";
 import "./Scaninfo.css";
 
 function ScanInfo() {
-  const navigate = useNavigate();
-
   const scannerRef = useRef(null);
   const fileInputRef = useRef(null);
   const processingRef = useRef(false);
@@ -208,8 +205,10 @@ function ScanInfo() {
 
   // Logout
   const handleLogout = async () => {
+    localStorage.removeItem("rizzscan_authenticated");
+    sessionStorage.removeItem("rizzscan_authenticated");
     await stopScanner();
-    navigate("/", { replace: true });
+    window.location.replace("/");
   };
 
   // Cleanup
