@@ -16,27 +16,42 @@ function ScanInfo({ onLogout }) {
   const [ticketData, setTicketData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [cameraActive, setCameraActive] = useState(false);
-  const [scannerFullscreen, setScannerFullscreen] = useState(false);
-
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
 
-  
+  // =====================================
+  // DATE FORMAT
+  // =====================================
+
+  const formatDate = (date) => {
+    if (!date) return "N/A";
+
+    const parsedDate = new Date(date);
+
+    if (isNaN(parsedDate.getTime())) return "N/A";
+
+    return parsedDate.toLocaleString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+  };
+
+  // =====================================
+  // TICKET LOOKUP API
+  // =====================================
 
   const lookupTicket = async (qrCode, alreadyLocked = false) => {
-    const value = qrCode?.trim();
-
-    if (!value) {
+    if (!qrCode || !qrCode.trim()) {
       setError("Invalid QR code. Please scan again.");
+      processingRef.current = false;
       return;
     }
 
-    if (value.length > 4000) {
-      setError("Invalid QR code.");
-      return;
-    }
-
-    if (processingRef.current && !alreadyLocked) return;
+    if (!alreadyLocked && processingRef.current) return;
 
     processingRef.current = true;
 
@@ -52,238 +67,185 @@ function ScanInfo({ onLogout }) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          qrCode: value,
+          qrCode: qrCode.trim(),
         }),
       });
 
       const result = await response.json();
 
-      console.log("QR Code:", value);
-      console.log("API Status:", response.status);
-      console.log("API Response:", result);
-
-      if (!response.ok || !result?.success || !result?.data) {
-        let errorMessage =
-          result?.message || "Unable to find ticket.";
-
-        if (response.status === 400) {
-          errorMessage = "QR could not be read. Please scan again.";
-        } else if (response.status === 404) {
-          errorMessage = "Ticket not found.";
-        } else if (response.status === 422) {
-          errorMessage = "Invalid QR code format.";
-        } else if (response.status === 500) {
-          errorMessage = "Server error. Please try again later.";
-        }
-
-        throw new Error(errorMessage);
+      if (!response.ok || result.success === false) {
+        throw new Error(
+          result.message || "Ticket information not found."
+        );
       }
 
-      setTicketData(result.data);
-      setMessage("Ticket information found successfully.");
+      const data = result.data || result.ticketData || result;
 
+      setTicketData(data);
+      setMessage("Ticket information loaded successfully.");
     } catch (err) {
-      console.error("Ticket Lookup Error:", err);
-
-      setError(
-        err.message || "Something went wrong. Please try again."
-      );
-
+      console.error("Ticket lookup error:", err);
+      setError(err.message || "Unable to fetch ticket information.");
     } finally {
       setLoading(false);
       processingRef.current = false;
     }
   };
 
-  
+  // =====================================
+  // STOP SCANNER
+  // =====================================
 
   const stopScanner = async () => {
     const scanner = scannerRef.current;
 
-    if (!scanner) {
-      setCameraActive(false);
-      return;
-    }
+    if (scanner) {
+      try {
+        if (scanner.isScanning) {
+          await scanner.stop();
+        }
 
-    try {
-      if (scanner.isScanning) {
-        await scanner.stop();
+        await scanner.clear();
+      } catch (err) {
+        console.log("Scanner cleanup:", err);
       }
-    } catch (err) {
-      console.error("Camera stop error:", err);
+
+      scannerRef.current = null;
     }
 
-    try {
-      scanner.clear();
-    } catch {}
-
-    scannerRef.current = null;
     setCameraActive(false);
   };
 
-  
+  // =====================================
+  // START CAMERA
+  // =====================================
 
   const startCamera = async () => {
-    if (loading || processingRef.current || cameraActive) return;
+    if (processingRef.current) return;
 
     setError("");
     setMessage("");
     setTicketData(null);
+    setCameraActive(true);
 
-    setScannerFullscreen(true);
+    requestAnimationFrame(async () => {
+      try {
+        const scanner = new Html5Qrcode("qr-reader");
 
-    try {
-      await new Promise((resolve) =>
-        requestAnimationFrame(resolve)
-      );
+        scannerRef.current = scanner;
 
-      const scanner = new Html5Qrcode("qr-reader");
-
-      scannerRef.current = scanner;
-
-      await scanner.start(
-        { facingMode: "environment" },
-        {
-          fps: 10,
-          qrbox: {
-            width: 250,
-            height: 250,
+        await scanner.start(
+          { facingMode: "environment" },
+          {
+            fps: 10,
+            qrbox: {
+              width: 250,
+              height: 250,
+            },
+            aspectRatio: 1,
           },
-          aspectRatio: 1,
-        },
-        async (decodedText) => {
-          if (processingRef.current) return;
+          async (decodedText) => {
+            if (processingRef.current) return;
 
-          processingRef.current = true;
+            processingRef.current = true;
 
-          await stopScanner();
+            await stopScanner();
 
-          setScannerFullscreen(false);
+            await lookupTicket(decodedText, true);
+          },
+          () => {}
+        );
+      } catch (err) {
+        console.error("Camera error:", err);
 
-          await lookupTicket(decodedText, true);
-        },
-        () => {}
-      );
+        setError(
+          "Unable to open camera. Please allow camera permission and try again."
+        );
 
-      setCameraActive(true);
-
-    } catch (err) {
-      console.error("Camera Error:", err);
-
-      scannerRef.current = null;
-
-      setCameraActive(false);
-      setScannerFullscreen(false);
-
-      setError(
-        err.message || "Unable to access camera."
-      );
-    }
+        await stopScanner();
+      }
+    });
   };
 
-  
-
-  const closeScanner = async () => {
-    await stopScanner();
-    setScannerFullscreen(false);
-  };
-
-  
+  // =====================================
+  // UPLOAD QR IMAGE
+  // =====================================
 
   const handleImageUpload = async (event) => {
     const file = event.target.files?.[0];
 
     if (!file) return;
 
-    if (processingRef.current) {
-      event.target.value = "";
-      return;
-    }
+    if (processingRef.current) return;
 
-    setError("");
-    setMessage("");
-    setTicketData(null);
-    setScannerFullscreen(false);
-
-    if (!["image/png", "image/jpeg"].includes(file.type)) {
-      setError("Please upload only PNG or JPG images.");
+    if (!file.type.startsWith("image/")) {
+      setError("Please select a valid image.");
       event.target.value = "";
       return;
     }
 
     processingRef.current = true;
+
+    setError("");
+    setMessage("");
+    setTicketData(null);
     setLoading(true);
 
+    let imageScanner;
+
     try {
-      if (scannerRef.current) {
-        await stopScanner();
-      }
+      imageScanner = new Html5Qrcode("qr-reader-upload");
 
-      const scanner = new Html5Qrcode("qr-reader");
-
-      scannerRef.current = scanner;
-
-      const decodedText = await scanner.scanFile(file, false);
+      const decodedText = await imageScanner.scanFile(file, true);
 
       try {
-        scanner.clear();
-      } catch {}
-
-      scannerRef.current = null;
-
-      setLoading(false);
+        await imageScanner.clear();
+      } catch (err) {
+        console.log(err);
+      }
 
       await lookupTicket(decodedText, true);
-
     } catch (err) {
-      console.error("QR Image Error:", err);
+      console.error("Image scanning error:", err);
 
       setError(
-        err.message || "Unable to read QR code from this image."
+        "QR code not found. Please upload a clear QR image."
       );
 
       setLoading(false);
       processingRef.current = false;
 
-    } finally {
-      if (scannerRef.current) {
+      if (imageScanner) {
         try {
-          scannerRef.current.clear();
-        } catch {}
-
-        scannerRef.current = null;
+          await imageScanner.clear();
+        } catch (clearError) {
+          console.log(clearError);
+        }
       }
-
-      event.target.value = "";
-    }
-  };
-
-  
-
-  const formatDate = (date) => {
-    if (!date) return "N/A";
-
-    const parsedDate = new Date(date);
-
-    if (Number.isNaN(parsedDate.getTime())) {
-      return "N/A";
     }
 
-    return parsedDate.toLocaleString("en-IN", {
-      dateStyle: "medium",
-      timeStyle: "short",
-    });
+    event.target.value = "";
   };
 
-  
+  // =====================================
+  // RESET
+  // =====================================
 
   const resetTicket = () => {
     setTicketData(null);
     setError("");
     setMessage("");
+    setLoading(false);
+    processingRef.current = false;
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   };
 
-  
+  // =====================================
+  // LOGOUT
+  // =====================================
 
   const handleLogout = async () => {
     await stopScanner();
@@ -291,330 +253,272 @@ function ScanInfo({ onLogout }) {
     if (onLogout) {
       onLogout();
     } else {
-      sessionStorage.removeItem("rizzscan_authenticated");
+      navigate("/", { replace: true });
     }
-
-    navigate("/", {
-      replace: true,
-    });
   };
 
-  
+  // =====================================
+  // CLEANUP
+  // =====================================
 
   useEffect(() => {
     return () => {
       const scanner = scannerRef.current;
 
       if (scanner) {
-        const cleanup = async () => {
-          try {
-            if (scanner.isScanning) {
-              await scanner.stop();
-            }
+        if (scanner.isScanning) {
+          scanner.stop().catch(() => {});
+        }
 
-            scanner.clear();
-          } catch {}
-        };
-
-        cleanup();
+        scanner.clear().catch(() => {});
       }
     };
   }, []);
 
-  
+  // =====================================
+  // FULLSCREEN CAMERA
+  // =====================================
 
-  return (
-    <div
-      className={
-        scannerFullscreen
-          ? "scan-info-page scanner-fullscreen"
-          : "scan-info-page"
-      }
-    >
-      <div className="scan-info-container">
+  if (cameraActive) {
+    return (
+      <div className="scanner-fullscreen">
 
-      
-
-        <div className="scan-info-header">
-          <div>
-            <h2>RizzScan</h2>
-            <p>Ticket Information Dashboard</p>
-          </div>
+        <div className="scanner-top-bar">
+          <h2>Scan Ticket QR</h2>
 
           <button
-            className="logout-btn"
-            onClick={handleLogout}
+            className="scanner-back-btn"
+            onClick={stopScanner}
           >
-            Logout
+            ✕ Close
           </button>
         </div>
 
-        
+        <div className="scanner-content">
+          <div id="qr-reader"></div>
 
-        {!ticketData && (
-          <div className="scan-lookup-card">
+          <p className="scanner-instruction">
+            Position the ticket QR code inside the scanning box.
+          </p>
+        </div>
 
-            <h3>Ticket QR Scanner</h3>
+      </div>
+    );
+  }
 
+  // =====================================
+  // MAIN PAGE
+  // =====================================
+
+  return (
+    <div className="scan-info-page">
+
+      {/* HEADER */}
+
+      <div className="scan-info-header">
+
+        <div className="scan-header-title">
+          <h1>Ticket Scanner</h1>
+          <p>Scan and view ticket information</p>
+        </div>
+
+        <button
+          className="logout-btn"
+          onClick={handleLogout}
+        >
+          Logout
+        </button>
+
+      </div>
+
+      {/* SCANNER CARD */}
+
+      {!ticketData && (
+        <div className="scanner-card">
+
+          <div className="scanner-card-heading">
+            <h2>Scan Ticket</h2>
             <p>
-              Scan a ticket QR code using your camera
-              or upload a QR image to view ticket information.
+              Scan a ticket QR code or upload a QR image.
             </p>
+          </div>
 
-            
+          <div className="scanner-actions">
 
-            <div className="scanner-actions">
+            <button
+              className="start-scan-btn"
+              onClick={startCamera}
+              disabled={loading}
+            >
+              <span>▦</span>
+              Open Camera Scanner
+            </button>
 
-              <button
-                className="camera-btn"
-                onClick={startCamera}
-                disabled={loading || cameraActive}
-              >
-                {cameraActive
-                  ? "Camera Active"
-                  : "Start Camera Scan"}
-              </button>
+            <button
+              className="upload-scan-btn"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={loading}
+            >
+              <span>↑</span>
+              Upload QR Image
+            </button>
 
-              <button
-                className="upload-btn"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={loading}
-              >
-                Upload QR Image
-              </button>
+          </div>
 
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/png,image/jpeg"
-                onChange={handleImageUpload}
-                hidden
-              />
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/png,image/jpeg,image/jpg"
+            onChange={handleImageUpload}
+            hidden
+          />
 
-              {scannerFullscreen && (
-                <button
-                  className="stop-camera-btn"
-                  onClick={closeScanner}
-                >
-                  Close Scanner
-                </button>
-              )}
+          <div
+            id="qr-reader-upload"
+            style={{ display: "none" }}
+          />
+
+          {loading && (
+            <div className="loading-message">
+              <div className="loading-spinner"></div>
+              <p>Checking ticket information...</p>
+            </div>
+          )}
+
+          {error && (
+            <div className="error-message">
+              {error}
+            </div>
+          )}
+
+          {message && (
+            <div className="success-message">
+              {message}
+            </div>
+          )}
+
+        </div>
+      )}
+
+      {/* =====================================
+          SINGLE TICKET INFORMATION CARD
+      ===================================== */}
+
+      {ticketData && (
+        <div className="ticket-result-wrapper">
+
+          <div className="ticket-main-card">
+
+            {/* EVENT NAME */}
+
+            <div className="ticket-card-header">
+
+              <div className="event-icon">
+                ♫
+              </div>
+
+              <div className="event-heading">
+
+                <span>EVENT NAME</span>
+
+                <h2>
+                  {ticketData.event?.title || "N/A"}
+                </h2>
+
+              </div>
 
             </div>
 
-          
+            {/* SCAN STATUS */}
 
-            <div
-              id="qr-reader"
-              className="qr-reader"
-            />
+            <div className="ticket-status-section">
 
-        
+              <span className="detail-label">
+                SCAN STATUS
+              </span>
 
-            {loading && (
-              <p className="loading-message">
-                Checking ticket information...
-              </p>
-            )}
-
-        
-
-            {error && (
-              <p className="error-message" role="alert">
-                {error}
-              </p>
-            )}
-
-        
-
-            {message && (
-              <p className="success-message">
-                {message}
-              </p>
-            )}
-
-          </div>
-        )}
-
-        
-
-        {ticketData && (
-          <div className="details-card">
-
-            <div className="details-card-header">
-
-              <h3>Ticket Information</h3>
-
-              <span
+              <div
                 className={`ticket-status ${
                   ticketData.scanned
                     ? "already-scanned"
                     : "not-scanned"
                 }`}
               >
+                <span className="status-dot"></span>
+
                 {ticketData.scanned
                   ? "Already Scanned"
-                  : "Not Scanned Yet"}
-              </span>
+                  : "Not Scanned"}
+              </div>
 
             </div>
 
-            <div className="ticket-details-list">
+            {/* SCAN TIME - ONLY IF SCANNED */}
 
-        
+            {ticketData.scanned && ticketData.scannedAt && (
+              <div className="event-date-info">
+                <div>
+                  <span>SCAN TIME</span>
 
-              <div className="ticket-detail-row">
-                <span>Event Name</span>
-                <strong>
-                  {ticketData.event?.title || "N/A"}
-                </strong>
+                  <strong>
+                    {formatDate(ticketData.scannedAt)}
+                  </strong>
+                </div>
               </div>
+            )}
 
-              <div className="ticket-detail-row">
-                <span>Event ID</span>
-                <strong>
-                  {ticketData.event?.eventId || "N/A"}
-                </strong>
-              </div>
+            {/* TICKET AND USER INFORMATION */}
 
-              <div className="ticket-detail-row">
-                <span>Event Date</span>
-                <strong>
-                  {formatDate(ticketData.event?.startDateTime)}
-                </strong>
-              </div>
+            <div className="event-date-info">
 
-              <div className="ticket-detail-row">
-                <span>Event End Date</span>
-                <strong>
-                  {formatDate(ticketData.event?.endDateTime)}
-                </strong>
-              </div>
+              <div>
+                <span>USERNAME</span>
 
-              
-
-              <div className="ticket-detail-row">
-                <span>Scan Status</span>
-                <strong>
-                  {ticketData.scanned
-                    ? "Already Scanned"
-                    : "Not Scanned Yet"}
-                </strong>
-              </div>
-
-              <div className="ticket-detail-row">
-                <span>Entry Status</span>
-                <strong>
-                  {ticketData.entryStatus || "N/A"}
-                </strong>
-              </div>
-
-              <div className="ticket-detail-row">
-                <span>Scan Time</span>
-                <strong>
-                  {ticketData.scanned
-                    ? formatDate(ticketData.scannedAt)
-                    : "N/A"}
-                </strong>
-              </div>
-
-              <div className="ticket-detail-row">
-                <span>Scanned Gate ID</span>
-                <strong>
-                  {ticketData.scannedGateId || "N/A"}
-                </strong>
-              </div>
-
-              <div className="ticket-detail-row">
-                <span>Scanned Device ID</span>
-                <strong>
-                  {ticketData.scannedDeviceId || "N/A"}
-                </strong>
-              </div>
-
-          
-
-              <div className="ticket-detail-row">
-                <span>Ticket ID</span>
-                <strong>
-                  {ticketData.ticket?.ticketId || "N/A"}
-                </strong>
-              </div>
-
-              <div className="ticket-detail-row">
-                <span>Booking Reference</span>
-                <strong>
-                  {ticketData.ticket?.bookingRef || "N/A"}
-                </strong>
-              </div>
-
-              <div className="ticket-detail-row">
-                <span>Ticket Type</span>
-                <strong>
-                  {ticketData.ticket?.ticketType || "N/A"}
-                </strong>
-              </div>
-
-              <div className="ticket-detail-row">
-                <span>Order Status</span>
-                <strong>
-                  {ticketData.ticket?.orderStatus || "N/A"}
-                </strong>
-              </div>
-
-              <div className="ticket-detail-row">
-                <span>Ticket Amount</span>
-                <strong>
-                  {ticketData.ticket?.currency || "INR"}{" "}
-                  {ticketData.ticket?.amount ?? "N/A"}
-                </strong>
-              </div>
-
-              <div className="ticket-detail-row">
-                <span>Purchase Date</span>
-                <strong>
-                  {formatDate(ticketData.ticket?.purchasedAt)}
-                </strong>
-              </div>
-
-              
-
-              <div className="ticket-detail-row">
-                <span>User Name</span>
                 <strong>
                   {ticketData.buyer?.name || "N/A"}
                 </strong>
               </div>
 
-              <div className="ticket-detail-row">
-                <span>User Email</span>
+              <div>
+                <span>TICKET ID</span>
+
+                <strong>
+                  {ticketData.ticket?.ticketId || "N/A"}
+                </strong>
+              </div>
+
+              <div>
+                <span>USER EMAIL</span>
+
                 <strong>
                   {ticketData.buyer?.email || "N/A"}
                 </strong>
               </div>
 
-              <div className="ticket-detail-row">
-                <span>User Phone</span>
+              <div>
+                <span>EVENT DATE</span>
+
                 <strong>
-                  {ticketData.buyer?.phone || "N/A"}
+                  {formatDate(ticketData.event?.startDateTime)}
                 </strong>
               </div>
 
             </div>
 
-          
-
-            <button
-              className="camera-btn scan-another-btn"
-              onClick={resetTicket}
-            >
-              Scan Another Ticket
-            </button>
-
           </div>
-        )}
 
-      </div>
+          {/* SCAN ANOTHER TICKET */}
+
+          <button
+            className="scan-another-btn"
+            onClick={resetTicket}
+          >
+            ↻ Scan Another Ticket
+          </button>
+
+        </div>
+      )}
+
     </div>
   );
 }

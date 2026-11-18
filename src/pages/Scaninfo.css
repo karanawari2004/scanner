@@ -1,735 +1,868 @@
 
-
+/* =========================================
+   GLOBAL STYLES
+========================================= */
 
 * {
+  margin: 0;
+  padding: 0;
   box-sizing: border-box;
 }
 
-html,
-body,
-#root {
-  min-height: 100%;
-  margin: 0;
+body {
+  font-family: "Inter", "Segoe UI", Arial, sans-serif;
+  background: #f4f7fc;
+  color: #172b4d;
 }
 
-body {
-  font-family: Arial, Helvetica, sans-serif;
-  background: #080f24;
-  color: #ffffff;
+button,
+input {
+  font-family: inherit;
 }
 
 button {
-  font-family: inherit;
   cursor: pointer;
 }
 
-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-
-
-
 .scan-info-page {
   min-height: 100vh;
-  min-height: 100dvh;
-  padding: 30px 20px;
-  background: #080f24;
+  padding: 35px 6%;
+  background:
+    radial-gradient(circle at top right, #e8f0ff 0, transparent 35%),
+    #f4f7fc;
 }
 
-.scan-info-container {
-  width: 100%;
-  max-width: 850px;
-  margin: auto;
-}
-
-
+/* =========================================
+   HEADER
+========================================= */
 
 .scan-info-header {
+  max-width: 1150px;
+  margin: 0 auto 35px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 15px;
-  margin-bottom: 35px;
+  gap: 20px;
 }
 
-.scan-info-header h2 {
-  margin: 0;
-  font-size: 28px;
+.scan-header-title h1 {
+  font-size: 30px;
   font-weight: 800;
-  color: #ffffff;
+  letter-spacing: -0.8px;
+  color: #172b4d;
 }
 
-.scan-info-header p {
-  margin: 7px 0 0;
-  color: #aab5ca;
+.scan-header-title p {
+  margin-top: 7px;
   font-size: 14px;
+  color: #7b879b;
 }
 
 .logout-btn {
   border: none;
-  padding: 12px 22px;
+  outline: none;
+  background: #fff;
+  color: #e04444;
+  border: 1px solid #f2dada;
   border-radius: 10px;
-  color: #ffffff;
-  background: #e33e49;
+  padding: 11px 23px;
   font-size: 14px;
   font-weight: 700;
   transition: 0.25s ease;
 }
 
 .logout-btn:hover {
-  background: #c92834;
+  background: #fff0f0;
+  border-color: #e04444;
+  transform: translateY(-2px);
 }
 
+/* =========================================
+   SCANNER CARD
+========================================= */
 
-
-.scan-lookup-card {
-  width: 100%;
-  padding: 28px;
-  background: #101a33;
-  border: 1px solid #263653;
-  border-radius: 18px;
+.scanner-card {
+  max-width: 700px;
+  margin: 45px auto;
+  padding: 45px 35px;
+  text-align: center;
+  background: #ffffff;
+  border: 1px solid #e7edf6;
+  border-radius: 22px;
+  box-shadow: 0 15px 45px rgba(35, 64, 110, 0.07);
 }
 
-.scan-lookup-card h3 {
-  margin: 0 0 14px;
-  font-size: 24px;
-  color: #ffffff;
+.scanner-card-heading h2 {
+  font-size: 25px;
+  color: #172b4d;
+  font-weight: 800;
 }
 
-.scan-lookup-card > p {
-  margin: 0;
-  color: #aab5ca;
-  font-size: 15px;
-  line-height: 1.7;
+.scanner-card-heading p {
+  color: #8491a5;
+  font-size: 14px;
+  margin-top: 10px;
+  line-height: 1.6;
 }
-
-
 
 .scanner-actions {
   display: flex;
-  flex-direction: column;
-  gap: 14px;
-  margin: 25px 0;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  margin-top: 32px;
+  flex-wrap: wrap;
 }
 
-.scanner-actions button {
-  width: 100%;
-  min-height: 58px;
-  padding: 14px 18px;
+.start-scan-btn,
+.upload-scan-btn {
+  min-width: 210px;
+  padding: 15px 22px;
   border: none;
-  border-radius: 13px;
-  color: #ffffff;
-  font-size: 16px;
+  border-radius: 12px;
+  font-size: 14px;
   font-weight: 700;
-  transition: 0.25s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.25s ease;
 }
 
-.camera-btn {
-  background: linear-gradient(135deg, #294b9d, #193477);
-  color: #ffffff;
+.start-scan-btn {
+  color: #fff;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  box-shadow: 0 7px 18px rgba(37, 99, 235, 0.2);
 }
 
-.camera-btn:hover:not(:disabled) {
-  background: #345bb3;
-  transform: translateY(-2px);
+.start-scan-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 11px 23px rgba(37, 99, 235, 0.3);
 }
 
-.upload-btn {
-  background: linear-gradient(135deg, #20ad76, #078451);
-  color: #ffffff;
+.upload-scan-btn {
+  color: #2563eb;
+  background: #eff5ff;
+  border: 1px solid #dbe8ff;
 }
 
-.upload-btn:hover:not(:disabled) {
-  background: #078451;
-  transform: translateY(-2px);
+.upload-scan-btn:hover {
+  background: #e1ecff;
+  transform: translateY(-3px);
 }
 
-.stop-camera-btn {
-  background: linear-gradient(135deg, #f04c55, #cf2029);
-  color: #ffffff;
+.start-scan-btn:disabled,
+.upload-scan-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
 }
 
-.stop-camera-btn:hover {
-  background: #c9232d;
+.start-scan-btn span,
+.upload-scan-btn span {
+  font-size: 19px;
 }
 
-
-
-.qr-reader {
-  position: relative;
-  width: 100%;
-  height: 500px;
-  margin: 25px auto 0;
-  overflow: hidden;
-  background: #000000;
-  border: 1px solid #29354d;
-  border-radius: 16px;
-}
-
-/* Remove default scanner spacing */
-
-#qr-reader__scan_region {
-  position: relative !important;
-  width: 100% !important;
-  height: 100% !important;
-  min-height: 100% !important;
-  overflow: hidden !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-}
-
-/* Camera video */
-
-#qr-reader video {
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: cover !important;
-  display: block !important;
-}
-
-/* Hide default QR shaded overlay */
-
-#qr-shaded-region {
-  display: none !important;
-}
-
-/* Hide unnecessary default dashboard */
-
-#qr-reader__dashboard {
-  display: none !important;
-}
-
-
-
-.scanner-fullscreen {
-  position: fixed !important;
-  inset: 0 !important;
-  z-index: 9999 !important;
-  width: 100% !important;
-  height: 100vh !important;
-  height: 100dvh !important;
-  min-height: 100dvh !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  overflow: hidden !important;
-  background: #000000 !important;
-}
-
-.scanner-fullscreen .scan-info-container {
-  width: 100% !important;
-  max-width: none !important;
-  height: 100% !important;
-  margin: 0 !important;
-}
-
-/* Hide main header */
-
-.scanner-fullscreen .scan-info-header {
-  display: none !important;
-}
-
-/* Full screen lookup card */
-
-.scanner-fullscreen .scan-lookup-card {
-  position: absolute !important;
-  inset: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
-  height: 100dvh !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  overflow: hidden !important;
-  border: none !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-}
-
-
-
-.scanner-fullscreen .scan-lookup-card > h3,
-.scanner-fullscreen .scan-lookup-card > p {
-  display: none !important;
-}
-
-/* Full-screen camera */
-
-.scanner-fullscreen .qr-reader {
-  position: fixed !important;
-  inset: 0 !important;
-  z-index: 1 !important;
-  width: 100vw !important;
-  height: 100vh !important;
-  height: 100dvh !important;
-  max-width: none !important;
-  margin: 0 !important;
-  border: none !important;
-  border-radius: 0 !important;
-  background: #000000 !important;
-  overflow: hidden !important;
-}
-
-/* Camera region */
-
-.scanner-fullscreen #qr-reader__scan_region {
-  position: absolute !important;
-  inset: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
-  min-height: 100% !important;
-  overflow: hidden !important;
-}
-
-
-
-.scanner-fullscreen #qr-reader video {
-  position: absolute !important;
-  inset: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: cover !important;
-}
-
-
-
-.scanner-fullscreen #qr-reader__scan_region::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: min(60vw, 365px);
-  aspect-ratio: 1 / 1;
-  transform: translate(-50%, -50%);
-  z-index: 5;
-  pointer-events: none;
-
-  border: 3px solid #ffffff;
-  border-radius: 22px;
-  background: transparent;
-}
-
-
-
-.scanner-fullscreen #qr-reader__scan_region::before {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: min(60vw, 365px);
-  height: 3px;
-  transform: translate(-50%, -50%);
-  z-index: 6;
-  pointer-events: none;
-  background: #ff2635;
-  box-shadow: 0 0 8px rgba(255, 38, 53, 0.6);
-  animation: scanLine 2s ease-in-out infinite alternate;
-}
-
-@keyframes scanLine {
-  0% {
-    top: calc(50% - min(30vw, 182px));
-  }
-
-  100% {
-    top: calc(50% + min(30vw, 182px));
-  }
-}
-
-
-
-.scanner-fullscreen .scanner-actions {
-  position: fixed !important;
-  top: 15px !important;
-  left: 0 !important;
-  right: 0 !important;
-  z-index: 20 !important;
-  display: flex !important;
-  flex-direction: row !important;
-  justify-content: space-between !important;
-  align-items: center !important;
-  gap: 10px !important;
-  margin: 0 !important;
-  padding: 15px 20px !important;
-  pointer-events: none;
-}
-
-
-
-.scanner-fullscreen .camera-btn,
-.scanner-fullscreen .upload-btn {
-  display: none !important;
-}
-
-
-
-.scanner-fullscreen .stop-camera-btn {
-  display: block !important;
-  width: auto !important;
-  min-height: auto !important;
-  padding: 10px 16px !important;
-  margin: 0 !important;
-  border-radius: 8px !important;
-  background: rgba(0, 0, 0, 0.55) !important;
-  color: #ffffff !important;
-  font-size: 15px !important;
-  font-weight: 600 !important;
-  pointer-events: auto !important;
-}
-
-
-
-.scanner-fullscreen .scan-lookup-card::before {
-  content: "Scan Ticket";
-  position: fixed;
-  top: 25px;
-  right: 22px;
-  z-index: 20;
-  color: #ffffff;
-  font-size: 18px;
-  font-weight: 800;
-  pointer-events: none;
-}
-
-
-
-.scanner-fullscreen .scan-lookup-card::after {
-  content: "Hold one QR inside frame • Remove it before rescanning";
-  position: fixed;
-  bottom: 65px;
-  left: 10px;
-  right: 10px;
-  z-index: 20;
-  text-align: center;
-  color: #ffffff;
-  font-size: 15px;
-  font-weight: 500;
-  text-shadow: 0 2px 5px rgba(0, 0, 0, 0.8);
-  pointer-events: none;
-}
-
-
+/* =========================================
+   LOADING
+========================================= */
 
 .loading-message {
-  margin-top: 20px;
-  color: #65a5ff;
-  text-align: center;
+  margin-top: 28px;
+  color: #2563eb;
+  font-size: 14px;
   font-weight: 600;
+}
+
+.loading-spinner {
+  width: 35px;
+  height: 35px;
+  border: 4px solid #dce8ff;
+  border-top-color: #2563eb;
+  border-radius: 50%;
+  margin: 0 auto 12px;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* =========================================
+   ERROR AND SUCCESS
+========================================= */
+
+.error-message,
+.success-message {
+  max-width: 700px;
+  margin: 20px auto;
+  padding: 14px 17px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.5;
+  text-align: center;
 }
 
 .error-message {
-  margin-top: 20px;
-  padding: 14px;
-  border-radius: 10px;
-  background: rgba(220, 53, 69, 0.13);
-  border: 1px solid rgba(220, 53, 69, 0.35);
-  color: #ff747d;
-  text-align: center;
+  color: #c62828;
+  background: #fff0f0;
+  border: 1px solid #ffd1d1;
 }
 
 .success-message {
-  margin-top: 20px;
-  padding: 14px;
-  border-radius: 10px;
-  background: rgba(32, 173, 118, 0.13);
-  border: 1px solid rgba(32, 173, 118, 0.35);
-  color: #46d99b;
-  text-align: center;
+  color: #168443;
+  background: #edfff3;
+  border: 1px solid #c7f0d5;
 }
 
+/* =========================================
+   TICKET RESULT WRAPPER
+========================================= */
 
+.ticket-result-wrapper {
+  max-width: 1050px;
+  margin: 0 auto;
+  animation: fadeIn 0.45s ease;
+}
 
-.details-card {
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* =========================================
+   EVENT CARD
+========================================= */
+
+.ticket-main-card {
+  position: relative;
+  overflow: hidden;
+  padding: 30px;
+  background: linear-gradient(135deg, #ffffff 0%, #f7faff 100%);
+  border: 1px solid #e2eaf5;
+  border-radius: 20px;
+  box-shadow: 0 12px 35px rgba(34, 65, 110, 0.07);
+}
+
+.ticket-main-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
-  padding: 25px;
-  margin-top: 25px;
-  background: #101a33;
-  border: 1px solid #263653;
-  border-radius: 18px;
-  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2);
+  height: 5px;
+  background: linear-gradient(90deg, #2563eb, #60a5fa);
 }
 
-.details-card-header {
+/* EVENT HEADER */
+
+.ticket-card-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 15px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid #2b3953;
-}
-
-.details-card-header h3 {
-  margin: 0;
-  color: #ffffff;
-  font-size: 23px;
-}
-
-
-
-.ticket-status {
-  display: inline-block;
-  padding: 9px 15px;
-  border-radius: 30px;
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.already-scanned {
-  background: rgba(239, 68, 68, 0.15);
-  color: #ff6c75;
-  border: 1px solid rgba(239, 68, 68, 0.4);
-}
-
-.not-scanned {
-  background: rgba(32, 173, 118, 0.15);
-  color: #35d69a;
-  border: 1px solid rgba(32, 173, 118, 0.4);
-}
-
-
-
-.ticket-details-list {
-  display: flex;
-  flex-direction: column;
-  margin-top: 15px;
-}
-
-.ticket-detail-row {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
   gap: 20px;
-  padding: 15px 5px;
-  border-bottom: 1px solid #273550;
+  padding-bottom: 25px;
+  border-bottom: 1px solid #e8edf5;
 }
 
-.ticket-detail-row span {
-  color: #aab5ca;
-  font-size: 14px;
-  flex: 1;
+.event-icon {
+  width: 65px;
+  height: 65px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #e7efff, #dce9ff);
+  color: #2563eb;
+  border-radius: 17px;
+  font-size: 30px;
 }
 
-.ticket-detail-row strong {
-  flex: 1;
-  color: #ffffff;
-  font-size: 14px;
-  font-weight: 600;
-  text-align: right;
+.event-heading span {
+  display: block;
+  color: #8290a5;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+}
+
+.event-heading h2 {
+  color: #172b4d;
+  font-size: 24px;
+  font-weight: 800;
+  margin: 7px 0;
   overflow-wrap: anywhere;
 }
 
-
-
-.scan-another-btn {
-  display: block;
-  width: 100%;
-  min-height: 55px;
-  margin-top: 25px;
-  border: none;
-  border-radius: 12px;
-  font-size: 16px;
-  font-weight: 700;
-  background: linear-gradient(135deg, #294b9d, #193477);
-  color: #ffffff;
-  transition: 0.25s ease;
+.event-heading p {
+  color: #8290a5;
+  font-size: 13px;
 }
 
-.scan-another-btn:hover {
-  background: #345bb3;
+/* =========================================
+   SCAN STATUS
+========================================= */
+
+.ticket-status-section {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.detail-label {
+  color: #8190a5;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.ticket-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 15px;
+  border-radius: 30px;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.already-scanned {
+  color: #168443;
+  background: #e7f9ed;
+  border: 1px solid #bce9cb;
+}
+
+.already-scanned .status-dot {
+  background: #16a34a;
+  box-shadow: 0 0 0 4px rgba(22, 163, 74, 0.12);
+}
+
+.not-scanned {
+  color: #dc2626;
+  background: #fff0f0;
+  border: 1px solid #ffd0d0;
+}
+
+.not-scanned .status-dot {
+  background: #dc2626;
+  box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.1);
+}
+
+.scan-time {
+  width: 100%;
+  margin-top: 3px;
+  color: #168443;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* =========================================
+   EVENT DATE INFORMATION
+========================================= */
+
+.event-date-info {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 27px;
+}
+
+.event-date-info > div {
+  padding: 17px;
+  background: #f5f8fd;
+  border: 1px solid #e8edf5;
+  border-radius: 12px;
+}
+
+.event-date-info span {
+  display: block;
+  margin-bottom: 8px;
+  color: #8491a5;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+}
+
+.event-date-info strong {
+  display: block;
+  color: #243b5a;
+  font-size: 14px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+/* =========================================
+   TICKET INFORMATION CARD
+========================================= */
+
+.ticket-information-card {
+  width: 100%;
+  padding: 30px;
+  margin-top: 22px;
+  background: #ffffff;
+  border: 1px solid #e5eaf2;
+  border-radius: 20px;
+  box-shadow: 0 12px 35px rgba(34, 65, 110, 0.06);
+}
+
+/* CARD HEADING */
+
+.information-card-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  margin-bottom: 22px;
+}
+
+.result-label {
+  color: #2563eb;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+}
+
+.information-card-heading h3 {
+  margin-top: 6px;
+  color: #172b4d;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.information-icon {
+  width: 45px;
+  height: 45px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #eff5ff;
+  border: 1px solid #dfebff;
+  border-radius: 13px;
+  font-size: 21px;
+}
+
+/* =========================================
+   INFORMATION GRID
+========================================= */
+
+.information-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 15px;
+}
+
+.information-item {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 9px;
+  min-height: 78px;
+  padding: 15px 17px;
+  background: #f8faff;
+  border: 1px solid #edf1f7;
+  border-radius: 12px;
+  transition: all 0.25s ease;
+}
+
+.information-item:hover {
+  background: #f0f5ff;
+  border-color: #d7e5ff;
   transform: translateY(-2px);
 }
 
+.information-item span {
+  color: #8491a5;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
 
+.information-item strong {
+  color: #243b5a;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
 
-@media (max-width: 600px) {
+/* SCAN TEXT COLORS */
 
+.information-item strong.scan-text-green {
+  color: #168443 !important;
+}
+
+.information-item strong.scan-text-red {
+  color: #dc2626 !important;
+}
+
+/* =========================================
+   INFORMATION DIVIDER
+========================================= */
+
+.information-divider {
+  width: 100%;
+  height: 1px;
+  margin: 28px 0;
+  background: #e8edf5;
+}
+
+/* =========================================
+   SCAN ANOTHER BUTTON
+========================================= */
+
+.scan-another-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  max-width: 320px;
+  margin: 28px auto 10px;
+  padding: 16px 22px;
+  color: #ffffff;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  border: none;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 800;
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.2);
+  transition: all 0.25s ease;
+}
+
+.scan-another-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 25px rgba(37, 99, 235, 0.3);
+}
+
+.scan-another-btn:active {
+  transform: scale(0.98);
+}
+
+/* =========================================
+   FULLSCREEN SCANNER
+========================================= */
+
+.scanner-fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #101827;
+  overflow-y: auto;
+}
+
+.scanner-top-bar {
+  width: 100%;
+  max-width: 700px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.scanner-top-bar h2 {
+  color: #ffffff;
+  font-size: 21px;
+  font-weight: 800;
+}
+
+.scanner-back-btn {
+  padding: 10px 17px;
+  color: #ffffff;
+  background: #29364a;
+  border: 1px solid #475569;
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 700;
+  transition: 0.2s ease;
+}
+
+.scanner-back-btn:hover {
+  background: #dc2626;
+  border-color: #dc2626;
+}
+
+.scanner-content {
+  width: 100%;
+  max-width: 600px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: auto 0;
+}
+
+#qr-reader {
+  width: 100%;
+  max-width: 500px;
+  overflow: hidden;
+  border: 2px solid #3b82f6 !important;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 0 35px rgba(37, 99, 235, 0.15);
+}
+
+#qr-reader video {
+  width: 100% !important;
+  object-fit: cover;
+  border-radius: 14px;
+}
+
+#qr-reader img {
+  max-width: 100%;
+}
+
+#qr-reader__scan_region {
+  min-height: 250px;
+}
+
+#qr-reader__dashboard {
+  padding: 12px !important;
+}
+
+#qr-reader__dashboard button {
+  padding: 9px 14px !important;
+  color: #ffffff !important;
+  background: #2563eb !important;
+  border: none !important;
+  border-radius: 8px !important;
+  font-weight: 700 !important;
+}
+
+#qr-reader__status_span {
+  color: #334155 !important;
+}
+
+.scanner-instruction {
+  max-width: 400px;
+  margin-top: 22px;
+  color: #cbd5e1;
+  text-align: center;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+/* =========================================
+   TABLET RESPONSIVE
+========================================= */
+
+@media (max-width: 768px) {
   .scan-info-page {
-    padding: 18px 16px;
+    padding: 25px 20px;
   }
 
   .scan-info-header {
     margin-bottom: 25px;
   }
 
-  .scan-info-header h2 {
-    font-size: 23px;
+  .scan-header-title h1 {
+    font-size: 25px;
   }
 
-  .scan-lookup-card {
-    padding: 20px 16px;
+  .scanner-card {
+    margin: 30px auto;
+    padding: 35px 22px;
   }
 
-  .scan-lookup-card h3 {
+  .ticket-main-card,
+  .ticket-information-card {
+    padding: 23px;
+  }
+
+  .event-heading h2 {
+    font-size: 21px;
+  }
+}
+
+/* =========================================
+   MOBILE RESPONSIVE
+========================================= */
+
+@media (max-width: 600px) {
+  .scan-info-page {
+    padding: 20px 14px;
+  }
+
+  .scan-info-header {
+    align-items: flex-start;
+    margin-bottom: 22px;
+  }
+
+  .scan-header-title h1 {
+    font-size: 22px;
+  }
+
+  .scan-header-title p {
+    font-size: 12px;
+  }
+
+  .logout-btn {
+    padding: 9px 14px;
+    font-size: 12px;
+  }
+
+  .scanner-card {
+    padding: 28px 18px;
+    margin: 25px auto;
+    border-radius: 17px;
+  }
+
+  .scanner-card-heading h2 {
     font-size: 21px;
   }
 
   .scanner-actions {
+    flex-direction: column;
     gap: 12px;
   }
 
-  .scanner-actions button {
-    min-height: 58px;
-    font-size: 15px;
+  .start-scan-btn,
+  .upload-scan-btn {
+    width: 100%;
+    min-width: unset;
   }
 
-  .qr-reader {
-    height: 480px;
+  .ticket-main-card {
+    padding: 20px 17px;
+    border-radius: 16px;
   }
 
-  .details-card {
-    padding: 18px 15px;
+  .ticket-card-header {
+    align-items: flex-start;
+    gap: 13px;
   }
 
-  .details-card-header h3 {
-    font-size: 20px;
+  .event-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    font-size: 23px;
   }
 
-  .ticket-detail-row {
+  .event-heading h2 {
+    font-size: 19px;
+  }
+
+  .event-heading p {
+    font-size: 11px;
+    overflow-wrap: anywhere;
+  }
+
+  .ticket-status-section {
+    align-items: flex-start;
+    flex-direction: column;
     gap: 10px;
-    padding: 13px 2px;
   }
 
-  .ticket-detail-row span,
-  .ticket-detail-row strong {
-    font-size: 13px;
+  .event-date-info {
+    grid-template-columns: 1fr;
+    gap: 12px;
   }
 
-  .scanner-fullscreen .scanner-actions {
-    top: 12px !important;
-    padding: 12px 16px !important;
+  .ticket-information-card {
+    padding: 20px 16px;
+    margin-top: 16px;
+    border-radius: 16px;
   }
 
-  .scanner-fullscreen .stop-camera-btn {
-    font-size: 14px !important;
+  .information-card-heading h3 {
+    font-size: 18px;
   }
 
-  .scanner-fullscreen .scan-lookup-card::before {
-    top: 22px;
-    right: 18px;
+  .information-grid {
+    grid-template-columns: 1fr;
+    gap: 11px;
+  }
+
+  .information-item {
+    min-height: 70px;
+    padding: 13px 14px;
+  }
+
+  .information-divider {
+    margin: 22px 0;
+  }
+
+  .scan-another-btn {
+    max-width: 100%;
+    margin-top: 22px;
+  }
+
+  .scanner-fullscreen {
+    padding: 15px;
+  }
+
+  .scanner-top-bar {
+    margin-bottom: 20px;
+  }
+
+  .scanner-top-bar h2 {
+    font-size: 18px;
+  }
+
+  #qr-reader {
+    border-radius: 13px;
+  }
+
+  #qr-reader__scan_region {
+    min-height: 200px;
+  }
+}
+
+/* =========================================
+   SMALL MOBILE
+========================================= */
+
+@media (max-width: 360px) {
+  .scan-info-page {
+    padding: 15px 10px;
+  }
+
+  .scan-header-title h1 {
+    font-size: 19px;
+  }
+
+  .ticket-main-card,
+  .ticket-information-card {
+    padding: 16px 13px;
+  }
+
+  .event-heading h2 {
     font-size: 17px;
   }
 
-  .scanner-fullscreen .scan-lookup-card::after {
-    bottom: 65px;
+  .information-item strong {
     font-size: 13px;
   }
 
-  .scanner-fullscreen #qr-reader__scan_region::after {
-    width: 60vw;
-    border-radius: 20px;
-  }
-
-  .scanner-fullscreen #qr-reader__scan_region::before {
-    width: 60vw;
-  }
-}
-
-
-
-@media (max-width: 380px) {
-
-  .scanner-fullscreen #qr-reader__scan_region::after {
-    width: 68vw;
-  }
-
-  .scanner-fullscreen #qr-reader__scan_region::before {
-    width: 68vw;
-  }
-
-  .scanner-fullscreen .scan-lookup-card::after {
-    font-size: 12px;
-  }
-
-  .ticket-detail-row {
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  .ticket-detail-row strong {
-    text-align: left;
-  }
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-.scan-info-page,
-.scan-lookup-card,
-.details-card {
-  min-width: 0;
-  max-width: 100%;
-}
-
-.scanner-fullscreen {
-  padding:
-    env(safe-area-inset-top)
-    0
-    env(safe-area-inset-bottom) !important;
-}
-
-.scanner-fullscreen .qr-reader {
-  width: 100vw !important;
-  height: 100dvh !important;
-}
-
-/* Adaptive scanning frame */
-
-.scanner-fullscreen #qr-reader__scan_region::after {
-  width: min(72vw, 365px);
-  max-width: calc(100vw - 40px);
-  aspect-ratio: 1 / 1;
-}
-
-/* Adaptive scanning line */
-
-.scanner-fullscreen #qr-reader__scan_region::before {
-  width: min(72vw, 365px);
-  max-width: calc(100vw - 40px);
-}
-
-/* Tablet and desktop */
-
-@media (min-width: 768px) {
-  .scan-info-container {
-    max-width: 850px;
-  }
-
-  .scanner-fullscreen #qr-reader__scan_region::after {
-    width: min(40vw, 365px);
-  }
-
-  .scanner-fullscreen #qr-reader__scan_region::before {
-    width: min(40vw, 365px);
-  }
-}
-
-
-
-@media (max-height: 500px) and (orientation: landscape) {
-  .scanner-fullscreen #qr-reader__scan_region::after {
-    height: min(65vh, 300px);
-    width: min(65vh, 300px);
-  }
-
-  .scanner-fullscreen #qr-reader__scan_region::before {
-    width: min(65vh, 300px);
-  }
-
-  .scanner-fullscreen .scan-lookup-card::after {
-    bottom: 12px;
-    font-size: 12px;
+  .scanner-back-btn {
+    padding: 8px 11px;
+    font-size: 11px;
   }
 }
