@@ -20,6 +20,44 @@ function ScanInfo({ onLogout }) {
   const [message, setMessage] = useState("");
 
   // =====================================
+  // MASK MOBILE NUMBER
+  // =====================================
+
+  const maskMobile = (mobile) => {
+    if (!mobile) return "N/A";
+
+    const number = String(mobile);
+    const digits = number.replace(/\D/g, "");
+
+    if (!digits) return "N/A";
+
+    if (digits.length <= 4) {
+      return "*".repeat(digits.length);
+    }
+
+    return "*".repeat(digits.length - 4) + digits.slice(-4);
+  };
+
+  // =====================================
+  // MASK EMAIL
+  // =====================================
+
+  const maskEmail = (email) => {
+    if (!email) return "N/A";
+
+    const [username, domain] = String(email).split("@");
+
+    if (!username || !domain) return email;
+
+    return (
+      username[0] +
+      "*".repeat(Math.max(username.length - 1, 3)) +
+      "@" +
+      domain
+    );
+  };
+
+  // =====================================
   // DATE FORMAT
   // =====================================
 
@@ -491,7 +529,19 @@ function ScanInfo({ onLogout }) {
                 <span>USER EMAIL</span>
 
                 <strong>
-                  {ticketData.buyer?.email || "N/A"}
+                  {maskEmail(ticketData.buyer?.email)}
+                </strong>
+              </div>
+
+              <div>
+                <span>MOBILE NUMBER</span>
+
+                <strong>
+                  {maskMobile(
+                    ticketData.buyer?.mobile ||
+                    ticketData.buyer?.phone ||
+                    ticketData.buyer?.phoneNumber
+                  )}
                 </strong>
               </div>
 
