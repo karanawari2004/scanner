@@ -1,88 +1,96 @@
-
 import { useState } from "react";
 import "./Login.css";
 
-const AUTH_KEY = "rizzscan_authenticated";
-const LOGIN_USERNAME = import.meta.env.VITE_LOGIN_USERNAME;
 const LOGIN_PASSWORD = import.meta.env.VITE_LOGIN_PASSWORD;
 
-const setAuthenticated = (value) => {
-  const authValue = value ? "true" : "false";
-  sessionStorage.setItem(AUTH_KEY, authValue);
-  localStorage.setItem(AUTH_KEY, authValue);
-};
-
-function Login() {
-  const [username, setUsername] = useState("");
+function Login({ onLogin }) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleLogin = (e) => {
     e.preventDefault();
     setError("");
 
-    if (!LOGIN_USERNAME || !LOGIN_PASSWORD) {
+    if (!LOGIN_PASSWORD) {
       setError("Login configuration is missing.");
       return;
     }
 
     setLoading(true);
 
-    if (
-      username.trim() === LOGIN_USERNAME.trim() &&
-      password === LOGIN_PASSWORD
-    ) {
-      setAuthenticated(true);
-      window.location.replace("/scanInfo");
+    if (password === LOGIN_PASSWORD) {
+      setPassword("");
+      onLogin();
     } else {
-      setAuthenticated(false);
-      setError("Invalid username or password");
-      setLoading(false);
+      setError("Incorrect password. Please try again.");
+      setPassword("");
     }
+
+    setLoading(false);
   };
 
   return (
-    <div className="login-page">
-      <form onSubmit={handleLogin}>
-        <h2>RizzScan Login</h2>
+    <div className="password-overlay">
+      <div className="password-popup">
 
-        <input
-          type="text"
-          placeholder="Enter Username"
-          aria-label="Username"
-          autoComplete="username"
-          required
-          value={username}
-          onChange={(e) => {
-            setUsername(e.target.value);
-            setError("");
-          }}
-        />
+        <div className="password-icon">
+          <span>🔐</span>
+        </div>
 
-        <input
-          type="password"
-          placeholder="Enter Password"
-          aria-label="Password"
-          autoComplete="current-password"
-          required
-          value={password}
-          onChange={(e) => {
-            setPassword(e.target.value);
-            setError("");
-          }}
-        />
+        <h2>Welcome Back</h2>
 
-        {error && (
-          <p className="login-error" role="alert">
-            {error}
-          </p>
-        )}
+        <p className="popup-subtitle">
+          Enter your password to access RizzScan.
+        </p>
 
-        <button type="submit" disabled={loading}>
-          {loading ? "Logging in..." : "Login"}
-        </button>
-      </form>
+        <form onSubmit={handleLogin}>
+
+          <div className="password-input-wrapper">
+            <input
+              type={showPassword ? "text" : "password"}
+              placeholder="Enter your password"
+              autoComplete="current-password"
+              autoFocus
+              required
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setError("");
+              }}
+            />
+
+            <button
+              type="button"
+              className="password-toggle"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? "Hide" : "Show"}
+            </button>
+          </div>
+
+          {error && (
+            <p className="password-error" role="alert">
+              {error}
+            </p>
+          )}
+
+          <button
+            type="submit"
+            className="password-submit"
+            disabled={loading}
+          >
+            {loading ? "Verifying..." : "Unlock Access"}
+          </button>
+
+        </form>
+
+        <div className="popup-footer">
+          Secure Access · RizzScan
+        </div>
+
+      </div>
     </div>
   );
 }

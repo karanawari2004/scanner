@@ -1,28 +1,33 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { useState } from "react";
 
 import Login from "./pages/Login";
 import ScanInfo from "./pages/Scaninfo";
 
-const AUTH_KEY = "rizzscan_authenticated";
-
-const isAuthenticated = () =>
-  localStorage.getItem(AUTH_KEY) === "true" ||
-  sessionStorage.getItem(AUTH_KEY) === "true";
-
 function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
   return (
     <BrowserRouter>
       <Routes>
         <Route
           path="/"
           element={
-            isAuthenticated() ? <Navigate to="/scanInfo" replace /> : <Login />
+            isAuthenticated ? (
+              <Navigate to="/scanInfo" replace />
+            ) : (
+              <Login onLogin={() => setIsAuthenticated(true)} />
+            )
           }
         />
         <Route
           path="/scanInfo"
           element={
-            isAuthenticated() ? <ScanInfo /> : <Navigate to="/" replace />
+            isAuthenticated ? (
+              <ScanInfo onLogout={() => setIsAuthenticated(false)} />
+            ) : (
+              <Navigate to="/" replace />
+            )
           }
         />
 
